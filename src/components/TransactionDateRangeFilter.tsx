@@ -11,14 +11,11 @@ import {
   colors,
 } from "@material-ui/core";
 import { ArrowDropDown as ArrowDropDownIcon, Cancel as CancelIcon } from "@material-ui/icons";
-import InfiniteCalendar, { Calendar, withRange } from "react-infinite-calendar";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
-import "react-infinite-calendar/styles.css";
 import { TransactionDateRangePayload } from "../models";
 import { hasDateQueryFields } from "../utils/transactionUtils";
-
-const { indigo } = colors;
-const CalendarWithRange = withRange(Calendar);
 
 export type TransactionListDateRangeFilterProps = {
   filterDateRange: Function;
@@ -48,15 +45,17 @@ const TransactionListDateRangeFilter: React.FC<TransactionListDateRangeFilterPro
   const queryHasDateFields = dateRangeFilters && hasDateQueryFields(dateRangeFilters);
 
   const [dateRangeAnchorEl, setDateRangeAnchorEl] = React.useState<HTMLDivElement | null>(null);
+  const [selectedDates, setSelectedDates] = React.useState<Date | Date[]>([new Date(), new Date()]);
 
-  const onCalendarSelect = (e: { eventType: number; start: any; end: any }) => {
-    if (e.eventType === 3) {
+  const onCalendarSelect = (dates: Date | Date[]) => {
+    if (Array.isArray(dates)) {
       filterDateRange({
-        dateRangeStart: new Date(e.start.setUTCHours(0, 0, 0, 0)).toISOString(),
-        dateRangeEnd: new Date(e.end.setUTCHours(23, 59, 59, 999)).toISOString(),
+        dateRangeStart: new Date(dates[0].setUTCHours(0, 0, 0, 0)).toISOString(),
+        dateRangeEnd: new Date(dates[1].setUTCHours(23, 59, 59, 999)).toISOString(),
       });
       setDateRangeAnchorEl(null);
     }
+    setSelectedDates(dates);
   };
 
   const handleDateRangeClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -121,28 +120,12 @@ const TransactionListDateRangeFilter: React.FC<TransactionListDateRangeFilterPro
           }}
           className={classes.popover}
         >
-          <InfiniteCalendar
+          <Calendar
             data-test="transaction-list-filter-date-range"
-            width={xsBreakpoint ? window.innerWidth : 350}
-            height={xsBreakpoint ? window.innerHeight : 300}
-            rowHeight={50}
-            Component={CalendarWithRange}
-            selected={false}
-            onSelect={onCalendarSelect}
-            locale={{
-              headerFormat: "MMM Do",
-            }}
-            theme={{
-              accentColor: indigo["400"],
-              headerColor: indigo["500"],
-              weekdayColor: indigo["300"],
-              selectionColor: indigo["300"],
-              floatingNav: {
-                background: indigo["400"],
-                color: "#FFF",
-                chevron: "#FFA726",
-              },
-            }}
+            onChange={onCalendarSelect}
+            selectRange={true}
+            value={selectedDates}
+            locale="en-US"
           />
         </Popover>
       )}
@@ -157,28 +140,12 @@ const TransactionListDateRangeFilter: React.FC<TransactionListDateRangeFilterPro
           <Button data-test="date-range-filter-drawer-close" onClick={() => handleDateRangeClose()}>
             Close
           </Button>
-          <InfiniteCalendar
+          <Calendar
             data-test="transaction-list-filter-date-range"
-            width={window.innerWidth}
-            height={window.innerHeight - 185}
-            rowHeight={50}
-            Component={CalendarWithRange}
-            selected={false}
-            onSelect={onCalendarSelect}
-            locale={{
-              headerFormat: "MMM Do",
-            }}
-            theme={{
-              accentColor: indigo["400"],
-              headerColor: indigo["500"],
-              weekdayColor: indigo["300"],
-              selectionColor: indigo["300"],
-              floatingNav: {
-                background: indigo["400"],
-                color: "#FFF",
-                chevron: "#FFA726",
-              },
-            }}
+            onChange={onCalendarSelect}
+            selectRange={true}
+            value={selectedDates}
+            locale="en-US"
           />
         </Drawer>
       )}
